@@ -12,21 +12,22 @@ public class Main {
      */
     public static void main(String[] args) {
 
-        int timeToRun;
+        double timeToRun;
         int threadCount;
         long totalProcessed = 0;
+        int largestPowerOfTwo = 0;
 
         switch (args.length) {
             case 1:
-                timeToRun = Integer.parseInt(args[0]);
+                timeToRun = Double.parseDouble(args[0]);
                 threadCount = Runtime.getRuntime().availableProcessors();
                 break;
             case 2:
-                timeToRun = Integer.parseInt(args[0]);
+                timeToRun = Double.parseDouble(args[0]);
                 threadCount = Integer.parseInt(args[1]);
                 break;
             default:
-                timeToRun = 60;
+                timeToRun = 60.0d;
                 threadCount = Runtime.getRuntime().availableProcessors();
                 break;
         }
@@ -44,11 +45,14 @@ public class Main {
             for (Finder finder : finders) {
                 finder.t.start();
             }
-            Thread.sleep(timeToRun * 1000);
+            Thread.sleep((long) (timeToRun * 1000));
             Buffer.setFinished();
             for (Finder finder : finders) {
                 finder.t.join();
                 totalProcessed += finder.getProcessed();
+                if (finder.getLargestPowerOfTwo() > largestPowerOfTwo) {
+                    largestPowerOfTwo = finder.getLargestPowerOfTwo();
+                }
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -63,6 +67,7 @@ public class Main {
         }
 
         System.out.println(System.lineSeparator() + "Total powers of two processed: " + totalProcessed);
+        System.out.println("Largest power of two processed: 2^" + largestPowerOfTwo);
 
     }
 }

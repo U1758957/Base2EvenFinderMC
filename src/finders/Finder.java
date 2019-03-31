@@ -12,6 +12,7 @@ public class Finder implements Runnable {
     private int initialValue;
     private int offset;
     private long processed = 0;
+    private int largestPowerOfTwo;
 
     /**
      * A constructor for the finders, defines the thread too
@@ -72,6 +73,14 @@ public class Finder implements Runnable {
         return processed;
     }
 
+    public int getLargestPowerOfTwo() {
+        return largestPowerOfTwo;
+    }
+
+    private void setLargestPowerOfTwo(int largestPowerOfTwo) {
+        this.largestPowerOfTwo = largestPowerOfTwo;
+    }
+
     @Override
     public void run() {
         int x = initialValue;
@@ -80,5 +89,6 @@ public class Finder implements Runnable {
             x += offset;
             processed++;
         }
+        setLargestPowerOfTwo(x);
     }
 }
