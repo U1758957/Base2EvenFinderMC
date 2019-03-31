@@ -11,6 +11,7 @@ public class Finder implements Runnable {
     public Thread t;
     private int initialValue;
     private int offset;
+    private long processed = 0;
 
     /**
      * A constructor for the finders, defines the thread too
@@ -62,12 +63,22 @@ public class Finder implements Runnable {
         if (checkEven(TWO.pow(n))) setNewFinding(n);
     }
 
+    /**
+     * Get how many powers of 2 were processed by this worker
+     *
+     * @return the amount processed
+     */
+    public long getProcessed() {
+        return processed;
+    }
+
     @Override
     public void run() {
         int x = initialValue;
         while (!(Buffer.isFinished())) {
             generateAndCheck(x);
             x += offset;
+            processed++;
         }
     }
 }

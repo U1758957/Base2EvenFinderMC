@@ -14,6 +14,7 @@ public class Main {
 
         int timeToRun;
         int threadCount;
+        long totalProcessed = 0;
 
         switch (args.length) {
             case 1:
@@ -25,10 +26,13 @@ public class Main {
                 threadCount = Integer.parseInt(args[1]);
                 break;
             default:
-                timeToRun = 1;
+                timeToRun = 60;
                 threadCount = Runtime.getRuntime().availableProcessors();
                 break;
         }
+
+        String plural = timeToRun != 1 ? "seconds" : "second";
+        System.out.println("Running for " + timeToRun + " " + plural + System.lineSeparator());
 
         Finder[] finders = new Finder[threadCount];
 
@@ -44,6 +48,7 @@ public class Main {
             Buffer.setFinished();
             for (Finder finder : finders) {
                 finder.t.join();
+                totalProcessed += finder.getProcessed();
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -51,11 +56,13 @@ public class Main {
 
         while (!Buffer.isBufferEmpty()) {
             try {
-                System.out.println("2^" + buffer.getFromBuffer());
+                System.out.println("Found: 2^" + buffer.getFromBuffer());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
+        System.out.println(System.lineSeparator() + "Total powers of two processed: " + totalProcessed);
 
     }
 }
