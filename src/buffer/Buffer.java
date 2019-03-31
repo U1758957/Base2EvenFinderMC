@@ -1,6 +1,8 @@
 package buffer;
 
-import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -12,7 +14,7 @@ public class Buffer {
 
     private static boolean bufferInUse = false;
     private static boolean finished = false;
-    private static ArrayDeque<Long> buffer = new ArrayDeque<>();
+    private static List<Integer> buffer = new ArrayList<>();
     private static int bufferSize = 0;
     private final Lock lock = new ReentrantLock();
     private final Condition bufferUsage = lock.newCondition();
@@ -34,17 +36,27 @@ public class Buffer {
     }
 
     /**
+     * Is the buffer empty?
+     *
+     * @return true if the size of the buffer is < 1
+     */
+    public static boolean isBufferEmpty() {
+        return bufferSize < 1;
+    }
+
+    /**
      * Add a power to the buffer
      *
      * @param x the power to add
      * @throws InterruptedException if a thread is interrupted while waiting
      */
-    public void addToBuffer(long x) throws InterruptedException {
+    public void addToBuffer(int x) throws InterruptedException {
         lock.lock();
         try {
             if (bufferInUse) bufferUsage.await();
             bufferInUse = true;
-            buffer.push(x);
+            buffer.add(x);
+            Collections.sort(buffer);
             bufferSize++;
         } finally {
             bufferInUse = false;
@@ -59,13 +71,13 @@ public class Buffer {
      * @return a power from the buffer
      * @throws InterruptedException if a thread is interrupted while waiting
      */
-    public long getFromBuffer() throws InterruptedException {
+    public int getFromBuffer() throws InterruptedException {
         lock.lock();
         try {
-            if (bufferInUse || bufferSize < 1) bufferUsage.await();
+            if (bufferInUse || (bufferSize < 1 && !finished)) bufferUsage.await();
             bufferInUse = true;
             bufferSize--;
-            return buffer.pop();
+            return buffer.get(bufferSize);
         } finally {
             bufferInUse = false;
             bufferUsage.signal();
